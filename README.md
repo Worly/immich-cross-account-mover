@@ -74,7 +74,7 @@ a logged error (the other mappings keep working).
 ## Running with Docker
 
 Images are published to Docker Hub on every release as
-`YOURUSER/immich-cross-account-mover` (multi-arch: `linux/amd64` + `linux/arm64`, so it runs on
+`worly/immich-cross-account-mover` (multi-arch: `linux/amd64` + `linux/arm64`, so it runs on
 a Raspberry Pi too).
 
 ```bash
@@ -147,8 +147,9 @@ which:
 Image tags follow the release tag — use semver tags like `v1.2.3`; the workflow publishes
 `{version}`, `{major}.{minor}`, and `latest`.
 
-**Required repository secrets:** `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access
-token with write scope).
+The image is published under the `worly` Docker Hub account (set in the workflow). The only
+**required repository secret** is `DOCKERHUB_TOKEN` — a Docker Hub access token with write
+scope.
 
 ## License
 

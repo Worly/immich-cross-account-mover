@@ -1,12 +1,11 @@
 # Example docker-compose for immich-cross-account-mover.
 #
 # Copy to docker-compose.yml and edit:
-#   - replace YOURUSER with the Docker Hub account the image is published under
 #   - create config.yaml and .env (see README)
 #   - point the service at your Immich server (see the networks note below)
 services:
   immich-cross-account-mover:
-    image: YOURUSER/immich-cross-account-mover:latest
+    image: worly/immich-cross-account-mover:latest
     container_name: immich-cross-account-mover
     restart: unless-stopped
     env_file:

@@ -35,14 +35,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: worly
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract image metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/immich-cross-account-mover
+          images: worly/immich-cross-account-mover
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
