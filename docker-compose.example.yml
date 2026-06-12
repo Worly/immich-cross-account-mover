@@ -1,0 +1,27 @@
+# Example docker-compose for immich-cross-account-mover.
+#
+# Copy to docker-compose.yml and edit:
+#   - replace YOURUSER with the Docker Hub account the image is published under
+#   - create config.yaml and .env (see README)
+#   - point the service at your Immich server (see the networks note below)
+services:
+  immich-cross-account-mover:
+    image: YOURUSER/immich-cross-account-mover:latest
+    container_name: immich-cross-account-mover
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    volumes:
+      - ./config.yaml:/config/config.yaml:ro
+    networks:
+      - immich
+
+networks:
+  # Attach to the network created by your Immich docker-compose stack so this
+  # container can reach the API at the hostname in config.yaml (e.g.
+  # http://immich-server:2283). Find the network name with `docker network ls`
+  # (commonly "immich_default"). Alternatively, delete this networks block and
+  # set immich_base_url in config.yaml to any URL that reaches your server.
+  immich:
+    external: true
+    name: immich_default

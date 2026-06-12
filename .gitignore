@@ -1,0 +1,7 @@
+.env
+config.yaml
+docker-compose.yml
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/

@@ -1,0 +1,5 @@
+immich_base_url: http://immich-server:2283/api
+poll_interval_seconds: 90
+mappings:
+  - source_album: "Trip photos"     # album name (or id) on account A
+    dest_album: "Shared trips"      # must already exist on account B

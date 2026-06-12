@@ -1,0 +1,22 @@
+[project]
+name = "immich-cross-account-mover"
+version = "0.1.0"
+description = "Move photos between two Immich accounts: verify a byte-identical copy lands in the destination album, then trash the original on the source."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Worly" }]
+dependencies = ["httpx>=0.27", "pydantic>=2", "pyyaml>=6"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "respx>=0.21"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
