@@ -28,9 +28,11 @@ def main(argv=None) -> None:
     source = ImmichClient(config.immich_base_url, config.source_api_key)
     dest = ImmichClient(config.immich_base_url, config.dest_api_key)
 
-    # Fail loud if either key is invalid.
-    source.get_me()
-    dest.get_me()
+    # Fail loud if either key is missing or lacks album access. We validate via
+    # list_albums (needs album.read, which the mover requires anyway) instead of
+    # /users/me, so the keys don't need the user.read permission.
+    source.list_albums()
+    dest.list_albums()
 
     mover = AssetMover(source, dest, dry_run=args.dry_run)
     poller = Poller(config, source, dest, mover)

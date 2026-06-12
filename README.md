@@ -71,6 +71,24 @@ mappings:
 Destination albums must already exist — a mapping whose destination is missing is skipped with
 a logged error (the other mappings keep working).
 
+### API key permissions
+
+Immich API keys are scoped. Create one key while logged in as **each** account (Account
+Settings → API Keys). The simplest option is to grant **all** permissions — fine for a
+self-hosted server where you own both accounts, and it sidesteps a known quirk where the
+`user.*` permissions aren't always selectable in the UI.
+
+If you prefer least privilege, grant exactly what each key uses:
+
+| Key | Account | Permissions |
+| --- | --- | --- |
+| `IMMICH_API_KEY_SOURCE` | source (A) | `album.read`, `asset.read`, `asset.view`, `asset.download`, `asset.delete` |
+| `IMMICH_API_KEY_DEST` | destination (B) | `album.read`, `asset.read`, `asset.upload`, `albumAsset.create` |
+
+The service does **not** need the `user.read` permission. If a scoped key still returns
+`403 Forbidden`, the log line names the endpoint that was rejected — grant the matching
+permission (or fall back to all).
+
 ## Running with Docker
 
 Images are published to Docker Hub on every release as
