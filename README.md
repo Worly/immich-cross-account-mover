@@ -3,7 +3,8 @@
 Safely move photos from one [Immich](https://immich.app) account to another. When a photo
 appears in a watched album on a **source** account, this service copies it into a mapped album
 on a **destination** account, verifies a byte-for-byte identical copy landed, and only then
-moves the original to the source account's trash.
+moves the original to the source account's trash and clears it from the source album. The
+source album is left empty but intact, ready to reuse.
 
 Built for the case where two accounts live on the **same Immich server** (for example, moving
 photos from a personal account into a shared/family account) and you want the move to be safe
@@ -28,8 +29,13 @@ source album:
    and it is a member of the destination album.
 5. **Trash on source** — only now move the original to the source account's trash
    (`force=false`, recoverable for 30 days).
+6. **Empty from the source album** — remove the trashed original from the source album so the
+   album is left intact but empty, ready to reuse. The album itself is never deleted. This runs
+   last and is best-effort: the photo is already safe on the destination and trashed on the
+   source, so a failure here only delays the album tidy-up (the 30-day trash purge clears the
+   membership regardless) and never fails the move.
 
-Any failure at any step leaves the photo on the source and retries next cycle. A photo that
+Any failure at step 1–5 leaves the photo on the source and retries next cycle. A photo that
 keeps failing simply stays in its source album — that lingering photo *is* your alert.
 
 ## Important caveats
@@ -82,7 +88,7 @@ If you prefer least privilege, grant exactly what each key uses:
 
 | Key | Account | Permissions |
 | --- | --- | --- |
-| `IMMICH_API_KEY_SOURCE` | source (A) | `album.read`, `asset.read`, `asset.view`, `asset.download`, `asset.delete` |
+| `IMMICH_API_KEY_SOURCE` | source (A) | `album.read`, `albumAsset.delete`, `asset.read`, `asset.view`, `asset.download`, `asset.delete` |
 | `IMMICH_API_KEY_DEST` | destination (B) | `album.read`, `asset.read`, `asset.upload`, `albumAsset.create` |
 
 The service does **not** need the `user.read` permission. If a scoped key still returns

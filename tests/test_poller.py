@@ -48,7 +48,7 @@ def test_run_once_processes_each_asset():
     poller = Poller(make_config(), source, dest, mover, sleep=lambda _: None)
     poller.run_once()
     assert mover.process_asset.call_count == 2
-    mover.process_asset.assert_any_call({"id": "a1"}, "D1")
+    mover.process_asset.assert_any_call({"id": "a1"}, "D1", "S1")
 
 
 def test_run_once_isolates_per_asset_errors():
@@ -92,7 +92,7 @@ def test_run_once_isolates_per_album_errors():
     source.get_album.side_effect = [RuntimeError("boom"), {"id": "S2", "assets": [{"id": "a1"}]}]
     poller = Poller(config, source, dest, mover, sleep=lambda _: None)
     poller.run_once()  # must not raise
-    mover.process_asset.assert_called_once_with({"id": "a1"}, "D2")
+    mover.process_asset.assert_called_once_with({"id": "a1"}, "D2", "S2")
 
 
 def test_run_forever_survives_run_once_error():

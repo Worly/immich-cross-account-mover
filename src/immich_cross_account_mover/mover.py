@@ -11,7 +11,7 @@ class AssetMover:
         self.dest = dest
         self.dry_run = dry_run
 
-    def process_asset(self, asset: dict, dest_album_id: str) -> bool:
+    def process_asset(self, asset: dict, dest_album_id: str, source_album_id: str | None = None) -> bool:
         asset_id = asset["id"]
         checksum = asset["checksum"]
 
@@ -65,13 +65,36 @@ class AssetMover:
             )
             return False
 
-        # Step 4: trash on source (the only mutation of account A).
+        # Step 4: trash on source.
         if self.dry_run:
             log.info("[dry-run] would trash source asset %s", asset_id)
             return False
         self.source.trash_assets([asset_id])
         log.info("trashed source asset %s (moved to dest %s)", asset_id, dest_asset_id)
+
+        # Step 5: drop the now-trashed asset from its source album so the album is
+        # left empty but intact, ready to reuse. Done last and best-effort: the
+        # photo is already safe on dest and trashed on source, so a failure here is
+        # cosmetic (the trash purge removes album membership anyway) and must never
+        # fail the move.
+        if source_album_id is not None:
+            self._empty_from_source_album(source_album_id, asset_id)
         return True
+
+    def _empty_from_source_album(self, source_album_id: str, asset_id: str) -> None:
+        try:
+            result = self.source.remove_from_album(source_album_id, asset_id)
+        except Exception:
+            log.warning(
+                "could not remove %s from source album %s; album left as-is",
+                asset_id, source_album_id, exc_info=True,
+            )
+            return
+        if not result.get("success") and result.get("error") != "not_found":
+            log.warning(
+                "could not remove %s from source album %s (%s)",
+                asset_id, source_album_id, result.get("error"),
+            )
 
     def _verify(self, dest_asset_id: str, checksum: str, dest_album_id: str) -> bool:
         info = self.dest.get_asset(dest_asset_id)

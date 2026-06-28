@@ -32,7 +32,7 @@ class Poller:
                 album = self.source.get_album(source_id)
                 for asset in album.get("assets", []):
                     try:
-                        self.mover.process_asset(asset, dest_id)
+                        self.mover.process_asset(asset, dest_id, source_id)
                     except Exception:
                         log.exception("error processing asset %s; leaving on source", asset.get("id"))
             except Exception:

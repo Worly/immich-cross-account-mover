@@ -115,6 +115,17 @@ class ImmichClient:
             )
         return results[0]
 
+    def remove_from_album(self, album_id: str, asset_id: str) -> dict:
+        """Drop an asset from an album. The album itself is never deleted, even
+        when this removes its last member. An empty result (asset already absent)
+        is reported as success, since the desired end state is reached either way.
+        """
+        body = {"ids": [asset_id]}
+        results = self._send("DELETE", f"/albums/{album_id}/assets", json=body).json()
+        if not results:
+            return {"id": asset_id, "success": True}
+        return results[0]
+
     def get_asset(self, asset_id: str) -> dict:
         return self._send("GET", f"/assets/{asset_id}").json()
 

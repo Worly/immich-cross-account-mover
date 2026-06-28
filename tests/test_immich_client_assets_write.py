@@ -36,6 +36,24 @@ def test_add_to_album_returns_first_result():
 
 
 @respx.mock
+def test_remove_from_album_sends_delete_with_ids():
+    route = respx.delete("http://immich/api/albums/D1/assets").mock(
+        return_value=httpx.Response(200, json=[{"id": "b1", "success": True}])
+    )
+    assert make_client().remove_from_album("D1", "b1") == {"id": "b1", "success": True}
+    body = route.calls.last.request.content
+    assert b"b1" in body
+
+
+@respx.mock
+def test_remove_from_album_empty_result_reports_success():
+    respx.delete("http://immich/api/albums/D1/assets").mock(
+        return_value=httpx.Response(200, json=[])
+    )
+    assert make_client().remove_from_album("D1", "b1")["success"] is True
+
+
+@respx.mock
 def test_get_asset_returns_dict():
     respx.get("http://immich/api/assets/b1").mock(
         return_value=httpx.Response(200, json={"id": "b1", "checksum": "CHK", "isTrashed": False})

@@ -29,6 +29,7 @@ def make_clients(dest_asset_id="b1", dup=False, trashed=False, verify_checksum=G
     dest.add_to_album.return_value = {"id": dest_asset_id, "success": True}
     dest.get_asset.return_value = {"id": dest_asset_id, "checksum": verify_checksum, "isTrashed": trashed}
     dest.get_album.return_value = {"id": "D", "assets": [{"id": dest_asset_id}] if in_album else []}
+    source.remove_from_album.return_value = {"id": "a1", "success": True}
     return source, dest
 
 
@@ -38,6 +39,52 @@ def test_new_asset_uploads_then_trashes():
     assert mover.process_asset(make_asset(), "D") is True
     dest.upload_asset.assert_called_once()
     source.trash_assets.assert_called_once_with(["a1"])
+
+
+def test_successful_move_empties_asset_from_source_album():
+    source, dest = make_clients()
+    mover = AssetMover(source, dest)
+    assert mover.process_asset(make_asset(), "D", "S") is True
+    source.trash_assets.assert_called_once_with(["a1"])
+    source.remove_from_album.assert_called_once_with("S", "a1")
+
+
+def test_source_album_removal_happens_after_trash():
+    source, dest = make_clients()
+    calls = []
+    source.trash_assets.side_effect = lambda ids: calls.append("trash")
+
+    def record_remove(album, asset):
+        calls.append("remove")
+        return {"id": asset, "success": True}
+
+    source.remove_from_album.side_effect = record_remove
+    mover = AssetMover(source, dest)
+    mover.process_asset(make_asset(), "D", "S")
+    assert calls == ["trash", "remove"]
+
+
+def test_source_album_removal_failure_does_not_fail_the_move():
+    source, dest = make_clients()
+    source.remove_from_album.side_effect = RuntimeError("boom")
+    mover = AssetMover(source, dest)
+    assert mover.process_asset(make_asset(), "D", "S") is True
+    source.trash_assets.assert_called_once_with(["a1"])
+
+
+def test_dry_run_does_not_remove_from_source_album():
+    source, dest = make_clients()
+    mover = AssetMover(source, dest, dry_run=True)
+    assert mover.process_asset(make_asset(), "D", "S") is False
+    source.remove_from_album.assert_not_called()
+
+
+def test_failed_verification_does_not_remove_from_source_album():
+    source, dest = make_clients(in_album=False)
+    mover = AssetMover(source, dest)
+    assert mover.process_asset(make_asset(), "D", "S") is False
+    source.trash_assets.assert_not_called()
+    source.remove_from_album.assert_not_called()
 
 
 def test_already_in_dest_skips_upload_then_trashes():
